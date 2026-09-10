@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FitQuest Campus</title>
+<style>
+:root{
+  --bg:#07111f; --panel:#101c30; --panel2:#14243b; --text:#f3f7ff;
+  --muted:#90a3bb; --cyan:#48dcff; --green:#49e594; --yellow:#ffc857;
+  --red:#ff7070; --border:rgba(255,255,255,.08);
+}
+*{box-sizing:border-box}
+body{
+  margin:0;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--text);
+  background:
+    radial-gradient(circle at 90% 0%,rgba(72,220,255,.12),transparent 26rem),
+    radial-gradient(circle at 0% 100%,rgba(73,229,148,.08),transparent 26rem),
+    var(--bg);
+}
+button{font:inherit;cursor:pointer}
+.app{display:flex;min-height:100vh}
+.sidebar{
+  width:245px;position:fixed;inset:0 auto 0 0;padding:20px 14px;
+  border-right:1px solid var(--border);background:rgba(7,17,31,.94);backdrop-filter:blur(18px);
+}
+.brand{display:flex;align-items:center;gap:10px;font-weight:900;font-size:20px;padding:8px;margin-bottom:20px}
+.logo{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;color:#05131c;
+  background:linear-gradient(135deg,var(--cyan),var(--green));}
+.nav button,.sidebtn{
+  width:100%;border:0;background:transparent;color:var(--muted);text-align:left;padding:12px 13px;
+  border-radius:12px;margin:3px 0;transition:.2s
+}
+.nav button:hover,.nav button.active{background:rgba(72,220,255,.10);color:white}
+.sidebar .bottom{position:absolute;bottom:16px;left:14px;right:14px}
+.sidebtn{border:1px solid var(--border);background:rgba(255,255,255,.03);color:white}
+main{margin-left:245px;width:calc(100% - 245px)}
+.topbar{
+  position:sticky;top:0;z-index:5;padding:15px 24px;display:flex;justify-content:space-between;align-items:center;
+  border-bottom:1px solid var(--border);background:rgba(7,17,31,.82);backdrop-filter:blur(18px)
+}
+.pills{display:flex;gap:8px;flex-wrap:wrap}
+.pill{padding:8px 11px;border-radius:999px;border:1px solid var(--border);background:rgba(255,255,255,.04);color:var(--muted);font-size:14px}
+.page{display:none;padding:26px}
+.page.active{display:block;animation:fade .2s ease}
+@keyframes fade{from{opacity:.45;transform:translateY(5px)}to{opacity:1;transform:none}}
+h1,h2,h3,p{margin-top:0}
+h1{font-size:34px;margin-bottom:6px}
+h2{font-size:22px}
+.sub,.muted{color:var(--muted)}
+.grid{display:grid;gap:15px}
+.stats{grid-template-columns:repeat(4,1fr);margin:20px 0}
+.card{
+  background:linear-gradient(180deg,rgba(20,36,59,.98),rgba(14,26,45,.98));
+  border:1px solid var(--border);border-radius:19px;padding:19px;box-shadow:0 16px 38px rgba(0,0,0,.22)
+}
+.stat .value{font-size:28px;font-weight:900;margin-top:6px}
+.hero{
+  overflow:hidden;position:relative;
+  background:linear-gradient(135deg,rgba(72,220,255,.17),rgba(73,229,148,.07),rgba(20,36,59,.98));
+}
+.route{display:flex;gap:7px;flex-wrap:wrap;margin:15px 0}
+.route span{padding:8px 10px;border-radius:999px;border:1px solid var(--border);background:rgba(255,255,255,.04)}
+.btn{
+  border:0;border-radius:11px;padding:11px 15px;font-weight:800;color:#04131c;
+  background:linear-gradient(135deg,var(--cyan),#8cecff)
+}
+.btn.secondary{color:white;background:rgba(255,255,255,.06);border:1px solid var(--border)}
+.btn.green{background:linear-gradient(135deg,var(--green),#8ff0b9)}
+.progress{height:10px;background:rgba(255,255,255,.07);border-radius:999px;overflow:hidden}
+.progress div{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--cyan),var(--green));transition:.3s}
+.missions{grid-template-columns:repeat(2,1fr);margin-top:15px}
+.mission-top{display:flex;justify-content:space-between;gap:10px}
+.xp{color:var(--yellow);font-weight:900}
+.split{grid-template-columns:1.2fr .8fr;margin-top:15px}
+.row{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid var(--border)}
+.row:last-child{border-bottom:0}
+.me{padding:11px;border:1px solid rgba(72,220,255,.22);border-radius:12px;background:rgba(72,220,255,.08)}
+.quest-grid{grid-template-columns:repeat(3,1fr)}
+.badges{grid-template-columns:repeat(4,1fr)}
+.badge{text-align:center}
+.badge .icon{font-size:38px}
+.locked{opacity:.4;filter:grayscale(1)}
+.map{
+  min-height:360px;position:relative;border-radius:18px;border:1px solid var(--border);
+  background:
+    linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px),
+    linear-gradient(145deg,#0d223a,#14263e);
+  background-size:28px 28px,28px 28px,auto;
+}
+.spot{
+  position:absolute;transform:translate(-50%,-50%);min-width:94px;text-align:center;padding:9px;border-radius:12px;
+  background:#132b47;border:1px solid rgba(72,220,255,.25)
+}
+.spot.done{background:rgba(73,229,148,.15);border-color:rgba(73,229,148,.4)}
+.camera{
+  min-height:360px;border-radius:18px;border:1px solid var(--border);display:grid;place-items:center;position:relative;overflow:hidden;
+  background:radial-gradient(circle at center,rgba(72,220,255,.09),transparent 40%),#091525;
+}
+.skeleton{font-size:100px;animation:bob 1.1s infinite alternate ease-in-out}
+@keyframes bob{to{transform:translateY(-9px)}}
+.score{font-size:54px;font-weight:900;color:var(--green)}
+.toast{
+  position:fixed;right:20px;bottom:20px;z-index:30;padding:13px 15px;border-radius:12px;
+  background:#13263e;border:1px solid var(--border);box-shadow:0 15px 40px rgba(0,0,0,.4);
+  opacity:0;transform:translateY(20px);pointer-events:none;transition:.25s
+}
+.toast.show{opacity:1;transform:none}
+.modal{
+  position:fixed;inset:0;background:rgba(0,0,0,.65);display:none;place-items:center;z-index:50;padding:20px
+}
+.modal.show{display:grid}
+.modal .box{max-width:440px;width:100%;text-align:center}
+.big{font-size:56px}
+.chart{display:flex;align-items:end;gap:10px;height:220px;padding-top:20px}
+.bar{flex:1;background:linear-gradient(var(--cyan),var(--green));border-radius:8px 8px 2px 2px;min-width:25px;position:relative}
+.bar span{position:absolute;bottom:-28px;width:100%;text-align:center;color:var(--muted);font-size:12px}
+.presentation{
+  min-height:72vh;display:grid;place-items:center;text-align:center;
+  background:linear-gradient(145deg,rgba(72,220,255,.08),rgba(73,229,148,.04));border:1px solid var(--border);border-radius:22px;padding:30px
+}
+.mobile-nav{display:none}
+@media(max-width:900px){
+  .sidebar{display:none} main{margin-left:0;width:100%}.stats{grid-template-columns:repeat(2,1fr)}
+  .quest-grid,.badges{grid-template-columns:repeat(2,1fr)}.split{grid-template-columns:1fr}
+  .mobile-nav{display:flex;position:fixed;bottom:0;left:0;right:0;background:#0a1728;border-top:1px solid var(--border);z-index:20;justify-content:space-around;padding:8px}
+  .mobile-nav button{border:0;background:transparent;color:var(--muted);font-size:12px}.page{padding-bottom:78px}
+}
+@media(max-width:600px){.missions,.stats,.quest-grid,.badges{grid-template-columns:1fr}.topbar{align-items:flex-start;gap:8px;flex-direction:column}}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand"><div class="logo">FQ</div> FITQUEST</div>
+    <div class="nav">
+      <button class="active" onclick="showPage('dashboard',this)">🏠 Dashboard</button>
+      <button onclick="showPage('quests',this)">🎯 Quests</button>
+      <button onclick="showPage('campus',this)">🗺️ Campus Quest</button>
+      <button onclick="showPage('coach',this)">🤖 AI Coach</button>
+      <button onclick="showPage('leaderboard',this)">🏆 Leaderboard</button>
+      <button onclick="showPage('challenges',this)">👥 Challenges</button>
+      <button onclick="showPage('rewards',this)">🎁 Rewards</button>
+      <button onclick="showPage('progress',this)">📊 Progress</button>
+      <button onclick="showPage('profile',this)">👤 Profile</button>
+    </div>
+    <div class="bottom">
+      <button class="sidebtn" onclick="presentationMode()">🎤 Presentation Mode</button>
+      <button class="sidebtn" onclick="resetDemo()">↻ Reset Demo</button>
+    </div>
+  </aside>
+
+  <main>
+    <div class="topbar">
+      <strong>FITQUEST CAMPUS</strong>
+      <div class="pills">
+        <span class="pill">🔥 <b id="topStreak">4</b> day streak</span>
+        <span class="pill">⭐ <b id="topXP">1240</b> XP</span>
+        <span class="pill">🏆 Rank <b id="topRank">#17</b></span>
+      </div>
+    </div>
+
+    <section id="dashboard" class="page active">
+      <h1>Good evening, Alex 👋</h1>
+      <p class="sub">Ready for today's quest?</p>
+
+      <div class="grid stats">
+        <div class="card stat">🔥 STREAK<div class="value"><span id="streak">4</span> days</div></div>
+        <div class="card stat">⭐ XP<div class="value" id="xp">1,240</div></div>
+        <div class="card stat">🏆 LEVEL<div class="value" id="level">7</div></div>
+        <div class="card stat">🥇 CAMPUS RANK<div class="value" id="rank">#17</div></div>
+      </div>
+
+      <div class="card hero">
+        <h2>🎯 Campus Explorer</h2>
+        <p class="muted">Turn your walk across campus into a quest.</p>
+        <div class="route"><span>📍 Library</span><span>→</span><span>📍 Canteen</span><span>→</span><span>📍 Ground</span><span>→</span><span>📍 Block B</span></div>
+        <p><b id="dashCheckpoints">2 / 4 checkpoints</b> · <span class="xp">+250 XP</span></p>
+        <button class="btn" onclick="showPage('campus')">Continue Quest</button>
+      </div>
+
+      <h2 style="margin-top:22px">Today's Missions</h2>
+      <div class="grid missions">
+        <div class="card">
+          <div class="mission-top"><strong>🚶 Walk 1,500 steps</strong><span class="xp">+100 XP</span></div>
+          <p class="muted"><span id="steps">1120</span> / 1500</p>
+          <div class="progress"><div id="stepsBar" style="width:74.6%"></div></div><br>
+          <button class="btn secondary" onclick="addSteps()">Simulate Walking</button>
+        </div>
+        <div class="card">
+          <div class="mission-top"><strong>🏃 3-Minute Movement</strong><span class="xp">+150 XP</span></div>
+          <p class="muted" id="movementStatus">Not started</p>
+          <div class="progress"><div id="movementBar" style="width:0%"></div></div><br>
+          <button class="btn secondary" onclick="movementChallenge()">Start Challenge</button>
+        </div>
+        <div class="card">
+          <div class="mission-top"><strong>👥 Challenge a Friend</strong><span class="xp">+200 XP</span></div>
+          <p class="muted" id="friendStatus">0 / 1 completed</p>
+          <button class="btn secondary" onclick="showPage('challenges')">Challenge</button>
+        </div>
+        <div class="card">
+          <div class="mission-top"><strong>🤖 AI Form Quest</strong><span class="xp">+250 XP</span></div>
+          <p class="muted"><span id="dashReps">6</span> / 10 push-ups</p>
+          <div class="progress"><div id="repBar" style="width:60%"></div></div><br>
+          <button class="btn secondary" onclick="showPage('coach')">Open AI Coach</button>
+        </div>
+      </div>
+
+      <div class="grid split">
+        <div class="card"><h2>🏆 Department Battle</h2>
+          <div class="row"><span>🥇 CSE — AI & ML</span><b id="deptXP">12,450 XP</b></div>
+          <div class="row"><span>🥈 ECE</span><b>11,890 XP</b></div>
+          <div class="row"><span>🥉 Mechanical</span><b>10,740 XP</b></div>
+          <p class="muted" style="margin-top:14px">Your department is only 560 XP away from the next milestone.</p>
+        </div>
+        <div class="card"><h2>📈 Today's Progress</h2>
+          <div class="score" id="dailyPercent">72%</div>
+          <p class="muted">Daily activity goal</p>
+          <div class="row"><span>Steps</span><b id="summarySteps">1,120</b></div>
+          <div class="row"><span>Active minutes</span><b id="activeMinutes">18</b></div>
+          <div class="row"><span>Quests completed</span><b id="questsDone">3</b></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="quests" class="page">
+      <h1>🎯 Quest Center</h1><p class="sub">Discover. Move. Earn. Compete. Return.</p>
+      <div class="grid quest-grid">
+        <div class="card"><h3>🗺️ Campus Explorer</h3><p class="muted">Visit 4 campus checkpoints.</p><p>Progress: <b id="questCheckpoint">2 / 4</b></p><p class="xp">+250 XP</p><button class="btn" onclick="showPage('campus')">Continue</button></div>
+        <div class="card"><h3>👥 Friendly Rivalry</h3><p class="muted">Complete a challenge with a friend.</p><p class="xp">+200 XP</p><button class="btn" onclick="showPage('challenges')">Start</button></div>
+        <div class="card"><h3>🔥 Weekend Warrior</h3><p class="muted">Complete 3 movement challenges.</p><p class="xp">+500 XP</p><button class="btn secondary" onclick="toast('Weekly quest activated')">Activate</button></div>
+        <div class="card"><h3>🤖 Form Master</h3><p class="muted">Complete 10 push-ups with acceptable form.</p><p class="xp">+250 XP</p><button class="btn" onclick="showPage('coach')">Open Coach</button></div>
+        <div class="card"><h3>⭐ XP Hunter</h3><p class="muted">Earn 1,000 XP this week.</p><p class="xp">+300 XP</p><button class="btn secondary" onclick="toast('XP Hunter tracked automatically')">Track</button></div>
+        <div class="card"><h3>🚶 Step Sprint</h3><p class="muted">Reach 1,500 steps today.</p><p class="xp">+100 XP</p><button class="btn secondary" onclick="addSteps()">Simulate</button></div>
+      </div>
+    </section>
+
+    <section id="campus" class="page">
+      <h1>🗺️ Campus Fitness Quest</h1><p class="sub">Your campus is the playground.</p>
+      <div class="grid split">
+        <div class="map">
+          <div class="spot done" style="left:15%;top:25%">✓ Library</div>
+          <div class="spot done" style="left:36%;top:55%">✓ Canteen</div>
+          <div class="spot" id="spot3" style="left:63%;top:35%">○ Ground</div>
+          <div class="spot" id="spot4" style="left:84%;top:70%">○ Block B</div>
+          <div class="spot" style="left:70%;top:82%">Auditorium</div>
+        </div>
+        <div class="card">
+          <h2>Campus Explorer</h2>
+          <div class="row"><span>✓ Library</span><span>Verified</span></div>
+          <div class="row"><span>✓ Canteen</span><span>Verified</span></div>
+          <div class="row"><span id="cp3">○ Main Ground</span><span id="cp3s">Pending</span></div>
+          <div class="row"><span id="cp4">○ Block B</span><span id="cp4s">Pending</span></div>
+          <p style="margin-top:15px">Progress: <b id="campusProgress">2 / 4</b></p>
+          <p class="xp">Quest reward: +250 XP</p>
+          <button class="btn green" onclick="scanCheckpoint()">📍 Scan Checkpoint</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="coach" class="page">
+      <h1>🤖 AI Form Coach</h1><p class="sub">Move better. Learn better. Level up.</p>
+      <div class="grid split">
+        <div class="camera">
+          <div style="text-align:center">
+            <div class="skeleton">🏃</div>
+            <h3>AI ANALYSIS — PROTOTYPE DEMO</h3>
+            <p class="muted">Select Demo Mode and simulate reps.</p>
+          </div>
+        </div>
+        <div class="card">
+          <h2>Push-ups</h2>
+          <div class="score"><span id="formScore">82</span>/100</div>
+          <p class="muted">FORM SCORE</p>
+          <h2>REP COUNTER: <span id="reps">6</span> / 10</h2>
+          <div class="progress"><div id="coachBar" style="width:60%"></div></div>
+          <div style="margin-top:16px">
+            <p id="feedback">✓ Back alignment looks good</p>
+            <p>✓ Range of motion acceptable</p>
+            <p>✓ Movement speed acceptable</p>
+          </div>
+          <button class="btn green" onclick="goodRep()">Simulate Good Rep</button>
+          <button class="btn secondary" onclick="badRep()">Simulate Incorrect Rep</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="leaderboard" class="page">
+      <h1>🏆 Campus Leaderboard</h1><p class="sub">Friendly competition that gives students a reason to move.</p>
+      <div class="grid split">
+        <div class="card"><h2>Students</h2>
+          <div class="row"><span>🥇 Aarav Singh</span><b>2,840 XP</b></div>
+          <div class="row"><span>🥈 Riya Mehta</span><b>2,710 XP</b></div>
+          <div class="row"><span>🥉 Kabir Jain</span><b>2,590 XP</b></div>
+          <div class="row"><span>4. Ananya Sharma</span><b>2,410 XP</b></div>
+          <div class="row"><span>5. Rohan Verma</span><b>2,260 XP</b></div>
+          <div class="row me"><span id="leaderRank">17. Alex Sharma</span><b id="leaderXP">1,240 XP</b></div>
+        </div>
+        <div class="card"><h2>Departments</h2>
+          <div class="row"><span>🥇 CSE — AI & ML</span><b id="leaderDept">12,450 XP</b></div>
+          <div class="row"><span>🥈 ECE</span><b>11,890 XP</b></div>
+          <div class="row"><span>🥉 Mechanical</span><b>10,740 XP</b></div>
+          <div class="row"><span>4. Civil</span><b>9,980 XP</b></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="challenges" class="page">
+      <h1>👥 Friend Challenges</h1><p class="sub">Fitness becomes easier when your friends are part of the game.</p>
+      <div class="card">
+        <h2>🔥 Rohan challenged you!</h2>
+        <p>Complete 2,000 steps today.</p><p class="xp">Reward: +300 XP</p>
+        <button class="btn green" onclick="acceptChallenge()">Accept Challenge</button>
+        <button class="btn secondary" onclick="toast('Challenge declined')">Decline</button>
+      </div>
+      <div class="card" style="margin-top:15px">
+        <h2>Create Challenge</h2>
+        <select id="friend" style="padding:11px;border-radius:10px;background:#0a1728;color:white;border:1px solid var(--border)">
+          <option>Riya Mehta</option><option>Aarav Singh</option><option>Kabir Jain</option>
+        </select>
+        <button class="btn" onclick="toast('✓ Challenge sent!')" style="margin-left:8px">Send Challenge</button>
+      </div>
+    </section>
+
+    <section id="rewards" class="page">
+      <h1>🎁 Rewards & Achievements</h1><p class="sub">Small wins become reasons to return tomorrow.</p>
+      <div class="grid badges">
+        <div class="card badge"><div class="icon">🏅</div><b>First Quest</b><p class="muted">Unlocked</p></div>
+        <div class="card badge"><div class="icon">🔥</div><b>4-Day Streak</b><p class="muted">Unlocked</p></div>
+        <div class="card badge" id="campusBadge"><div class="icon">🗺️</div><b>Campus Explorer</b><p class="muted" id="campusBadgeText">Locked</p></div>
+        <div class="card badge" id="formBadge"><div class="icon">🤖</div><b>Form Master</b><p class="muted" id="formBadgeText">Locked</p></div>
+        <div class="card badge locked"><div class="icon">🏆</div><b>Department Champion</b></div>
+        <div class="card badge locked"><div class="icon">🌟</div><b>Campus Legend</b></div>
+      </div>
+    </section>
+
+    <section id="progress" class="page">
+      <h1>📊 Your Progress</h1><p class="sub">See your movement turn into progress.</p>
+      <div class="card">
+        <h2>Weekly Steps</h2>
+        <div class="chart">
+          <div class="bar" style="height:41%"><span>Mon</span></div>
+          <div class="bar" style="height:58%"><span>Tue</span></div>
+          <div class="bar" style="height:78%"><span>Wed</span></div>
+          <div class="bar" style="height:67%"><span>Thu</span></div>
+          <div class="bar" style="height:100%"><span>Fri</span></div>
+          <div class="bar" style="height:82%"><span>Sat</span></div>
+          <div class="bar" style="height:50%"><span>Sun</span></div>
+        </div>
+      </div>
+      <div class="grid stats" style="margin-top:30px">
+        <div class="card stat">Steps<div class="value">37,100</div></div>
+        <div class="card stat">Quests<div class="value">18</div></div>
+        <div class="card stat">XP Earned<div class="value" id="progressXP">1,240</div></div>
+        <div class="card stat">Best Day<div class="value">Friday</div></div>
+      </div>
+    </section>
+
+    <section id="profile" class="page">
+      <h1>👤 Alex Sharma</h1><p class="sub">CSE — AI & ML · 1st Year</p>
+      <div class="grid stats">
+        <div class="card stat">Level<div class="value" id="profileLevel">7</div></div>
+        <div class="card stat">XP<div class="value" id="profileXP">1,240</div></div>
+        <div class="card stat">Quests<div class="value">42</div></div>
+        <div class="card stat">Challenges Won<div class="value">12</div></div>
+      </div>
+      <div class="card">
+        <h2>Why FitQuest?</h2>
+        <p class="muted">FITNESS IS NOT THE PROBLEM. MOTIVATION IS.</p>
+        <h2>Fitness + Competition + Friends + Rewards = Motivation</h2>
+      </div>
+    </section>
+
+    <section id="presentation" class="page">
+      <div class="presentation">
+        <div>
+          <div class="big">🎮</div>
+          <h1 id="slideTitle">What if your college campus became a fitness game?</h1>
+          <p class="sub" id="slideText">FITQUEST CAMPUS — Turn movement into a game.</p>
+          <button class="btn secondary" onclick="prevSlide()">← Previous</button>
+          <button class="btn" onclick="nextSlide()">Next →</button>
+          <p class="muted" style="margin-top:15px" id="slideNum">Slide 1 / 8</p>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="mobile-nav">
+  <button onclick="showPage('dashboard')">🏠<br>Home</button>
+  <button onclick="showPage('quests')">🎯<br>Quests</button>
+  <button onclick="showPage('campus')">🗺️<br>Campus</button>
+  <button onclick="showPage('coach')">🤖<br>Coach</button>
+  <button onclick="showPage('leaderboard')">🏆<br>Ranks</button>
+</div>
+
+<div class="toast" id="toast"></div>
+<div class="modal" id="modal">
+  <div class="card box">
+    <div class="big">🎉</div>
+    <h1 id="modalTitle">QUEST COMPLETE!</h1>
+    <p class="xp" id="modalReward">+250 XP</p>
+    <p class="muted" id="modalText">Your progress has been updated.</p>
+    <button class="btn" onclick="closeModal()">Continue</button>
+  </div>
+</div>
+
+<script>
+const defaultState = {xp:1240, streak:4, rank:17, level:7, steps:1120, checkpoints:2, reps:6, questsDone:3, activeMinutes:18, campusDone:false, formDone:false, movementDone:false};
+let state = JSON.parse(localStorage.getItem('fitquestState')) || {...defaultState};
+
+function save(){localStorage.setItem('fitquestState',JSON.stringify(state)); render();}
+function fmt(n){return n.toLocaleString();}
+function showPage(id,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  window.scrollTo(0,0);
+}
+function toast(msg){
+  const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),1800);
+}
+function modal(title,reward,text){
+  document.getElementById('modalTitle').textContent=title;
+  document.getElementById('modalReward').textContent=reward;
+  document.getElementById('modalText').textContent=text;
+  document.getElementById('modal').classList.add('show');
+}
+function closeModal(){document.getElementById('modal').classList.remove('show')}
+function addXP(amount){
+  state.xp+=amount;
+  state.rank=Math.max(1,state.rank-Math.ceil(amount/120));
+  state.level=Math.max(1,Math.floor(state.xp/300)+3);
+}
+function addSteps(){
+  if(state.steps>=1500){toast('Step quest already completed');return}
+  state.steps=Math.min(1500,state.steps+190);
+  if(state.steps===1500){addXP(100);state.questsDone++;modal('STEP QUEST COMPLETE!','+100 XP','1,500 steps reached.')}
+  save();
+}
+function movementChallenge(){
+  if(state.movementDone){toast('Movement quest already completed');return}
+  state.movementDone=true;state.activeMinutes+=3;state.questsDone++;addXP(150);
+  modal('MOVEMENT QUEST COMPLETE!','+150 XP','3 minutes completed.');save();
+}
+function scanCheckpoint(){
+  if(state.checkpoints>=4){toast('Campus quest already completed');return}
+  state.checkpoints++;
+  addXP(60);
+  toast('✓ Checkpoint verified · +60 XP');
+  if(state.checkpoints===4 && !state.campusDone){
+    state.campusDone=true;state.questsDone++;addXP(250);
+    setTimeout(()=>modal('CAMPUS EXPLORER COMPLETE!','+250 XP','🏅 Campus Explorer badge unlocked.'),400);
+  }
+  save();
+}
+function goodRep(){
+  if(state.formDone){toast('AI Form Quest already completed');return}
+  state.reps=Math.min(10,state.reps+1);
+  document.getElementById('feedback').textContent='✓ Good rep detected — alignment acceptable';
+  if(state.reps===10){
+    state.formDone=true;state.streak=5;state.questsDone++;addXP(250);
+    modal('AI FORM QUEST COMPLETE!','+250 XP','🏅 Form Master unlocked · Streak increased to 5 days.');
+  }
+  save();
+}
+function badRep(){
+  document.getElementById('formScore').textContent='68';
+  document.getElementById('feedback').textContent='⚠ Form adjustment: maintain a steadier movement';
+  toast('Form adjustment suggested');
+  setTimeout(()=>document.getElementById('formScore').textContent='82',1200);
+}
+function acceptChallenge(){
+  document.getElementById('friendStatus').textContent='Challenge accepted';
+  toast('🔥 Challenge accepted!');
+}
+function resetDemo(){
+  state={...defaultState};localStorage.removeItem('fitquestState');save();toast('Demo reset');
+}
+function render(){
+  const level=state.level, pct=Math.min(100,Math.round(state.steps/1500*100));
+  ['xp','profileXP','progressXP'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent=fmt(state.xp)});
+  document.getElementById('topXP').textContent=state.xp;
+  document.getElementById('streak').textContent=state.streak;document.getElementById('topStreak').textContent=state.streak;
+  document.getElementById('rank').textContent='#'+state.rank;document.getElementById('topRank').textContent='#'+state.rank;
+  document.getElementById('leaderRank').textContent=state.rank+'. Alex Sharma';document.getElementById('leaderXP').textContent=fmt(state.xp)+' XP';
+  document.getElementById('level').textContent=level;document.getElementById('profileLevel').textContent=level;
+  document.getElementById('steps').textContent=state.steps;document.getElementById('summarySteps').textContent=fmt(state.steps);
+  document.getElementById('stepsBar').style.width=pct+'%';
+  document.getElementById('dailyPercent').textContent=Math.min(100,Math.round((state.steps/1500)*72+state.questsDone*4))+'%';
+  document.getElementById('dashCheckpoints').textContent=state.checkpoints+' / 4 checkpoints';
+  document.getElementById('questCheckpoint').textContent=state.checkpoints+' / 4';
+  document.getElementById('campusProgress').textContent=state.checkpoints+' / 4';
+  if(state.checkpoints>=3){document.getElementById('cp3').textContent='✓ Main Ground';document.getElementById('cp3s').textContent='Verified';document.getElementById('spot3').textContent='✓ Ground';document.getElementById('spot3').classList.add('done')}
+  if(state.checkpoints>=4){document.getElementById('cp4').textContent='✓ Block B';document.getElementById('cp4s').textContent='Verified';document.getElementById('spot4').textContent='✓ Block B';document.getElementById('spot4').classList.add('done')}
+  document.getElementById('reps').textContent=state.reps;document.getElementById('dashReps').textContent=state.reps;
+  document.getElementById('coachBar').style.width=(state.reps*10)+'%';document.getElementById('repBar').style.width=(state.reps*10)+'%';
+  document.getElementById('questsDone').textContent=state.questsDone;document.getElementById('activeMinutes').textContent=state.activeMinutes;
+  document.getElementById('movementStatus').textContent=state.movementDone?'Completed':'Not started';
+  document.getElementById('movementBar').style.width=state.movementDone?'100%':'0%';
+  if(state.campusDone){document.getElementById('campusBadgeText').textContent='Unlocked';document.getElementById('campusBadge').classList.remove('locked')}
+  else document.getElementById('campusBadge').classList.add('locked');
+  if(state.formDone){document.getElementById('formBadgeText').textContent='Unlocked';document.getElementById('formBadge').classList.remove('locked')}
+  else document.getElementById('formBadge').classList.add('locked');
+  const dept=12450+(state.xp-1240);document.getElementById('deptXP').textContent=fmt(dept)+' XP';document.getElementById('leaderDept').textContent=fmt(dept)+' XP';
+}
+const slides=[
+ ["What if your college campus became a fitness game?","FITQUEST CAMPUS — Turn movement into a game."],
+ ["FITNESS IS NOT THE PROBLEM. MOTIVATION IS.","Students already know they should move. The missing ingredient is motivation."],
+ ["Campus + Friends + Quests + XP","Turn everyday movement into a social game."],
+ ["Your campus is the playground.","Library → Canteen → Ground → Block B. Move through real campus quests."],
+ ["AI Form Coach","Exercise quests connect movement quality to XP and achievements."],
+ ["Social Competition","Students compete as individuals, classes and departments."],
+ ["Real-world activity → Digital reward","Activity → Verification → XP → Leaderboard → New challenge → Return tomorrow."],
+ ["DON'T TELL STUDENTS TO EXERCISE.","GIVE THEM A REASON TO MOVE. · FITQUEST CAMPUS"]
+];
+let slide=0;
+function presentationMode(){showPage('presentation');slide=0;drawSlide()}
+function drawSlide(){document.getElementById('slideTitle').textContent=slides[slide][0];document.getElementById('slideText').textContent=slides[slide][1];document.getElementById('slideNum').textContent='Slide '+(slide+1)+' / '+slides.length}
+function nextSlide(){slide=Math.min(slides.length-1,slide+1);drawSlide()}
+function prevSlide(){slide=Math.max(0,slide-1);drawSlide()}
+render();
+</script>
+</body>
+</html>
